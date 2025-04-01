@@ -19,7 +19,7 @@ workflow {
 
     // ALIGN_SEQUENCES(family_id, human_fasta, mouse_fasta, sequence_type)
     TRANSFORM_EXP_DATA(family_id, human_exp, mouse_exp, transform_method, orthologs)
-    EXPRESSION_SIMILARITY(family_id, TRANSFORM_EXP_DATA.out.human_transformed, TRANSFORM_EXP_DATA.out.mouse_transformed, orthologs)
+    EXPRESSION_SIMILARITY(family_id, TRANSFORM_EXP_DATA.out.human_transformed, TRANSFORM_EXP_DATA.out.mouse_transformed, orthologs, transform_method)
 
 
 }

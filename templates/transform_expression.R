@@ -72,6 +72,10 @@ if (transform_method == "log"){
 
     } else if (transform_method == "zscore") {
         stop("Z-score transformation not implemented yet")
+    } else if (transform_method == "tpm"){
+      human_transformed <- human_exp
+      mouse_transformed <- mouse_exp
+      print("No transformation applied")
 
     } else {
     stop("Invalid transformation method")
@@ -81,6 +85,7 @@ if (transform_method == "log"){
 human_transformed <- cbind(gene_id = rownames(human_transformed), human_transformed)
 mouse_transformed <- cbind(gene_id = rownames(mouse_transformed), mouse_transformed)
 
+print(human_transformed[1:5,1:5])
 
 # Save the transformed data without row names
 write.table(human_transformed, output_human, sep = "\\t", row.names = FALSE)
@@ -99,6 +104,8 @@ if (evaluate_expression == TRUE){
     human_transformed <- human_transformed[orthologs_human, ]
     mouse_transformed <- mouse_transformed[orthologs_mouse, ]
 
+    print(human_transformed[1:5,1:5])
+
     # Convert Gene ID to gene name (using ortholog file)
     # Map gene names using the ortholog file
     rownames(human_transformed) <- orthologs[match(rownames(human_transformed), orthologs[,1]), 8]
@@ -108,6 +115,8 @@ if (evaluate_expression == TRUE){
     human_transformed <- human_transformed[!is.na(rownames(human_transformed)), ]
     mouse_transformed <- mouse_transformed[!is.na(rownames(mouse_transformed)), ]
 
+    print(human_transformed[1:5,1:5])
+
     # Ensure the row names match between human and mouse
     common_genes <- intersect(rownames(human_transformed), rownames(mouse_transformed))
     human_transformed <- human_transformed[common_genes, ]
@@ -115,10 +124,14 @@ if (evaluate_expression == TRUE){
 
     print(dim(human_transformed))
     print(dim(mouse_transformed))
+    print(human_transformed[1:5,1:5])
 
     # Compute Pearson correlation
-    human_values <- as.numeric(as.matrix(human_transformed))
-    mouse_values <- as.numeric(as.matrix(mouse_transformed))
+    human_values <- as.numeric(as.matrix(human_transformed[, -1]))
+    mouse_values <- as.numeric(as.matrix(mouse_transformed[, -1]))
+
+    print(human_values[1:5])
+    print(mouse_values[1:5])
 
     correlation <- cor(human_values, mouse_values, method = "pearson")
     r_squared <- correlation^2
@@ -131,28 +144,3 @@ if (evaluate_expression == TRUE){
 # Write a report with the results
 report_file = paste0(family_id, "_", transform_method, "_report.txt")
 writeLines(sprintf("Pearson correlation: %.3f, R² = %.3f", correlation, r_squared), report_file)
-
-
-
-
-# # Check that row names match between human and mouse
-# if (!all(rownames(human_exp) == rownames(mouse_exp))) {
-#   stop("Row names do not match between human and mouse data")
-# }
-
-# # Remove non expressed genes (0 TPM in all samples)
-# human_filtered <- human_exp[rowSums(human_exp) > 0, ]
-# mouse_filtered <- mouse_exp[rowSums(mouse_exp) > 0, ]
-
-# non_expressed_human <- setdiff(rownames(human_exp), rownames(human_filtered))
-# cat("Number of genes not expressed in human:", length(non_expressed_genes), "\\n")
-# non_expressed_mouse <- setdiff(rownames(mouse_exp), rownames(mouse_filtered))
-# cat("Number of genes not expressed in mouse:", length(non_expressed_genes), "\\n")
-
-# # Filter to keep only the common genes between human and mouse
-# common_genes <- intersect(rownames(human_filtered), rownames(mouse_filtered))
-# human_filtered <- human_filtered[common_genes, ]
-# mouse_filtered <- mouse_filtered[common_genes, ]
-
-# # Print the number of genes kept after filtering
-# cat("Number of genes kept after filtering:", nrow(human_filtered), "\\n")

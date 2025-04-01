@@ -9,10 +9,11 @@ process EXP_SIMILARITY {
     path human_tpm
     path mouse_tpm
     val orthologs_mapped
+    val transform_method
 
 
     output:
-    path("*${family_id}_exp_similarity.tsv") , emit: exp_sim
+    path("${family_id}_${transform_method}_exp_similarity.tsv") , emit: exp_sim
 
     script:
     template 'exp_similarity.py'

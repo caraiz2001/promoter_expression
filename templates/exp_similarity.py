@@ -10,6 +10,7 @@ human_tpm_file = "${human_tpm}"
 mouse_tpm_file = "${mouse_tpm}"
 orthologs_mapped_file = "${orthologs_mapped}"
 family_id = "${family_id}"
+transform_method = "${transform_method}"
 
 # human_tpm_file = "/Users/crsitina/Documents/phd/promoter_expression/results/transform_expression/kinase_clr_exp_human.tsv"
 # mouse_tpm_file = "/Users/crsitina/Documents/phd/promoter_expression/results/transform_expression/kinase_clr_exp_mouse.tsv" 
@@ -105,4 +106,4 @@ exp_sim = cosine_sim_long.merge(correlation_df_long, on=["gene_name_human", "gen
 
 
 # Save the similarity matrix to a file
-exp_sim.to_csv(f"{family_id}_exp_similarity.tsv", index=False, sep="\\t")
+exp_sim.to_csv(f"{family_id}_{transform_method}_exp_similarity.tsv", index=False, sep="\\t")

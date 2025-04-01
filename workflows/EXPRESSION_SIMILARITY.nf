@@ -9,9 +9,10 @@ workflow EXPRESSION_SIMILARITY {
     human_tpm
     mouse_tpm
     orthologs
+    transform_method
 
     main:
-    EXP_SIMILARITY(family_id, human_tpm, mouse_tpm, orthologs)
+    EXP_SIMILARITY(family_id, human_tpm, mouse_tpm, orthologs, transform_method)
 
     exp_sim = EXP_SIMILARITY.out.exp_sim
 }
