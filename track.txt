@@ -1,0 +1,5 @@
+Expression similarity is performed after filtering for expressed genes
+The filtering (remove < threshold in all samples) is done in the transform_expression module
+The filtering is done by removing all the genes that are < threshold in ALL samples
+
+The threshold for clr transformed should not be the same as for log
