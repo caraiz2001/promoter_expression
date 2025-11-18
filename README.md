@@ -36,10 +36,15 @@ The repository follows an organized structure to facilitate reproducibility and 
 ```
 /promoter_expression
 │-- data/                  # Raw and processed data (sequences, mapping info, expression data)
+|   |-- db_ids/            # Mapped ensemble gene ids (mouse/human orthologs)
+|   |-- expression/        # Gene counts
+|   |-- sequence/          # Promoter and protein sequences (human/mouse)
 │-- modules/               # Nextflow modules for core tasks
 │   │-- pairwise_alignment/  # Align promoter or protein sequences
 │   │-- transform_expression/ # Transform expression data using several methods 
-│   │-- expression_similarity/ # Compute expression-based similarity (cosine and pearson)
+│   │-- exp_similarity/ # Compute expression-based similarity (cosine and pearson)
+|   |-- combine_similarity/ # Combine sequence and expression similarity
+|   |-- label_pairs/ # Label positive/negative pairs for training using different criteria
 │-- workflows/             # Workflow scripts integrating multiple modules
 │-- scripts/               # Additional scripts (data preprocessing, sequence retrieval, etc.)
 │-- exploratory_analysis/  # Exploratory data analysis scripts & plots
@@ -93,5 +98,5 @@ please feel free to contribute! If you have suggestions or would like to collabo
 ---
 *Author: Cristina Araiz*
 *Affiliation: Center for Genomic Regulation*
-*Contact: caraiz@crg.es*
+*Contact: cristina.araiz@crg.eu*
 

@@ -1,24 +1,26 @@
 #!/usr/bin/env python3
 
+# ---------------------------------------
+# Import packages + define parameters + load data
+# ---------------------------------------
+
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 import itertools
 from scipy.stats import pearsonr
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-human_tpm_file = "${human_tpm}"
-mouse_tpm_file = "${mouse_tpm}"
+human_tpm_file = "${human_transformed}"
+mouse_tpm_file = "${mouse_transformed}"
 orthologs_mapped_file = "${orthologs_mapped}"
 family_id = "${family_id}"
 transform_method = "${transform_method}"
 
-# human_tpm_file = "/Users/crsitina/Documents/phd/promoter_expression/results/transform_expression/kinase_clr_exp_human.tsv"
-# mouse_tpm_file = "/Users/crsitina/Documents/phd/promoter_expression/results/transform_expression/kinase_clr_exp_mouse.tsv" 
-
 human_tpm = pd.read_csv(human_tpm_file, sep="\\t")
 mouse_tpm = pd.read_csv(mouse_tpm_file, sep="\\t")
 orthologs_mapped = pd.read_csv(orthologs_mapped_file, sep="\\t")
-
 
 # Filter the TPM data to keep only the genes ids present in the orthologs file
 #%%
@@ -36,15 +38,25 @@ mouse_tpm_orthologs["gene_name"] = mouse_tpm_orthologs["gene_id"].map(orthologs_
 human_tpm_orthologs = human_tpm_orthologs[["gene_id", "gene_name"] + [col for col in human_tpm_orthologs.columns if col not in ["gene_id", "gene_name"]]]
 mouse_tpm_orthologs = mouse_tpm_orthologs[["gene_id", "gene_name"] + [col for col in mouse_tpm_orthologs.columns if col not in ["gene_id", "gene_name"]]]
 
-expression_threshold = 0
+# Print the number of genes in each data frame
+print(f"Number of genes in human orthologs data frame: {len(human_tpm_orthologs)}")
+print(f"Number of genes in mouse orthologs data frame: {len(mouse_tpm_orthologs)}")
+
+human_filtered = human_tpm_orthologs.copy()
+mouse_filtered = mouse_tpm_orthologs.copy()
+
+# Compute the mean expression for each gene across all samples
+human_mean_expression = human_filtered.iloc[:, 2:].mean(axis=1)
+mouse_mean_expression = mouse_filtered.iloc[:, 2:].mean(axis=1)
+
+# Print summary of the mean expression
+print(f"Mean expression in human data frame: {human_mean_expression.describe()}")
+print(f"Mean expression in mouse data frame: {mouse_mean_expression.describe()}")
+
 
 # Keep only the columns that have a mean expression above the threshold. Ignore the columns gene_id and gene_name
 numeric_cols = human_tpm_orthologs.iloc[3].apply(type) != str # True if the value is a string
 
-
-
-human_filtered = human_tpm_orthologs.loc[human_tpm_orthologs.loc[:, human_tpm_orthologs.columns[numeric_cols]].mean(axis = 1) > expression_threshold]
-mouse_filtered = mouse_tpm_orthologs.loc[mouse_tpm_orthologs.loc[:, mouse_tpm_orthologs.columns[numeric_cols]].mean(axis = 1) > expression_threshold]
 
 
 # Which genes are in both data frames
@@ -104,6 +116,65 @@ correlation_df_long = correlation_df.reset_index().melt(id_vars="gene_name_human
 # Merge the two similarity DataFrames
 exp_sim = cosine_sim_long.merge(correlation_df_long, on=["gene_name_human", "gene_name_mouse"])
 
+# Filter for the rows with gene_name_human == gene_name_mouse
+sim_orthologs = exp_sim[exp_sim["gene_name_human"] == exp_sim["gene_name_mouse"]]
+sim_non_orthologs = exp_sim[exp_sim["gene_name_human"] != exp_sim["gene_name_mouse"]]
+
+# Plot density plot
+
+plt.figure()
+sns.kdeplot(sim_non_orthologs['exp_sim_cosine'], color = "coral", label = "non-orthologs")
+sns.kdeplot(sim_orthologs['exp_sim_cosine'], color = "blue", label = "orthologs")
+plt.legend(['Orthologs = False', 'Orthologs = True'])
+plt.title('Expression similarity (Cosine)')
+plt.savefig(f'{family_id}_{transform_method}_exp_sim_cosine_density.png', dpi=300, bbox_inches='tight')
+
+plt.figure()
+sns.kdeplot(sim_non_orthologs['exp_sim_pearson'], color = "coral", label = "non-orthologs")
+sns.kdeplot(sim_orthologs['exp_sim_pearson'], color = "blue", label = "orthologs")
+plt.legend(['Orthologs = False', 'Orthologs = True'])
+plt.title('Expression similarity (Pearson)')
+plt.savefig(f'{family_id}_{transform_method}_exp_sim_cosine_Pearson.png', dpi=300, bbox_inches='tight')
+
+
 
 # Save the similarity matrix to a file
 exp_sim.to_csv(f"{family_id}_{transform_method}_exp_similarity.tsv", index=False, sep="\\t")
+
+
+# ---------------------------
+# Write report to a file
+# ---------------------------
+
+# - Number of genes in the input df (transformed and filtered for removing non expressed)
+# - Number of orthologs 
+# - Avereage expression gene-wise -> describe
+# - Exp similarity -> describe 
+# - Plot orthologs vs non-orthologs (cos/pearson)
+# 
+
+
+text = f"""
+
+    The number of genes in the input df (transformed and filtered for non-expressed genes) is:
+    {human_tpm.shape[0]} (human) and {mouse_tpm.shape[0]} (mouse)
+
+    The number of orthologs:
+    {human_tpm_orthologs.shape[0]} (human) and {mouse_tpm_orthologs.shape[0]} (mouse)
+
+    Mean expression in human data frame: 
+    {human_mean_expression.describe()} (human)
+    {mouse_mean_expression.describe()} (mouse)
+
+    Expression similarity across genes pairs:
+    - Cosine: {exp_sim['exp_sim_cosine'].describe()}
+    - Pearson: {exp_sim['exp_sim_cosine'].describe()}
+
+"""
+
+# Write the report to a file
+report_file = f"{family_id}_{transform_method}_report.txt"
+with open(report_file, "w") as file:
+    file.write(text)
+
+print(f"Report written to {report_file}")
