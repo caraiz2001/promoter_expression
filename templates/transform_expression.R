@@ -62,6 +62,7 @@ if (!is.numeric(human_exp[, 1])) {
 
 if (transform_method == "log"){
     # Just take the natural log of (tpm + 1)
+    # Just take the natural log of (tpm + 1)
     human_transformed <- log(human_exp + 1)
     mouse_transformed <- log(mouse_exp + 1)
 
@@ -180,7 +181,6 @@ if (evaluate_expression == TRUE){
     r_squared <- correlation^2
 
     cat(sprintf("Pearson correlation: %.3f, R² = %.3f  ", correlation, r_squared))
-    
 
 }
 

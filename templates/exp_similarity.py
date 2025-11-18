@@ -162,7 +162,7 @@ text = f"""
     The number of orthologs:
     {human_tpm_orthologs.shape[0]} (human) and {mouse_tpm_orthologs.shape[0]} (mouse)
 
-    Mean expression in human data frame: 
+    Mean expression in human data frame:
     {human_mean_expression.describe()} (human)
     {mouse_mean_expression.describe()} (mouse)
 

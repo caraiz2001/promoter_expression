@@ -16,6 +16,7 @@ process COMBINE_SIMILARITY {
     output:
     path("${family_id}_${transform_method}_combined_similarity.tsv") , emit: combined_similarity_df
     path("*.png"), emit: plots
+    path("${family_id}_${transform_method}_expression_similarity_stats.txt"), emit: stats
 
     script:
     template 'combine_similarity.py'

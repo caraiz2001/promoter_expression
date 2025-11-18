@@ -10,7 +10,6 @@ workflow EXPRESSION_SIMILARITY {
     mouse_transformed
     transform_method
     orthologs
-    
 
     main:
     EXP_SIMILARITY(family_id, human_transformed, mouse_transformed, transform_method, orthologs)
